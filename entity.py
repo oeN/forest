@@ -7,8 +7,10 @@ class Entity:
     self.y = y
     self.char = char
     self.color = color
+  
+  def relative(self, x: int, y: int):
+    return self.x + x, self.y + y
 
-  def move(self, dx, dy):
+  def move(self, x: int, y: int) -> None:
     # Move the entity by a given amount
-    self.x += dx
-    self.y += dy
+    self.x, self.y = self.relative(x, y)
