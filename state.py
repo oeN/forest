@@ -28,13 +28,13 @@ class GameState(tcod.event.EventDispatch):
     for y in range(self.active_map.height):
       for x in range(self.active_map.width):
         tcod.map_set_properties(self.fov_map, x, y, 
-          not self.active_map.tiles[x][y],
-          not self.active_map.tiles[x][y])
+          not self.active_map.tiles[x][y].block_sight,
+          not self.active_map.tiles[x][y].blocked)
   
   def recompute_fov(self):
     if self.fov_recompute:
       player = self.active_map.player
-      fov_algorithm = 0
+      fov_algorithm = 6
       fov_light_walls = True
       fov_radius = 10
       tcod.map_compute_fov(self.fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
@@ -42,7 +42,7 @@ class GameState(tcod.event.EventDispatch):
   def on_draw(self, console: tcod.console.Console) -> None:
     console.clear()
     self.recompute_fov()
-    self.active_map.render(console, self.fov_map)
+    self.active_map.render(console, self.fov_map, self.fov_recompute)
     self.fov_recompute = False
     tcod.console_flush()
   

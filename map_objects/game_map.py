@@ -31,11 +31,11 @@ class GameMap:
     self.width = width
     self.height = height
     self.shape = width, height
-    self.tiles = np.zeros(self.shape, dtype=bool, order='F')
+    self.tiles: List[Tile] = []
     self.entities: List[entity.Entity] = []
 
   def generate(self) -> None:
-    self.tiles[...] = WALL
+    self.tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
     self.player = entity.Entity(self.width//2, self.height//2, ord('@'), tcod.white)
     rooms = []
     num_rooms = 0
@@ -71,48 +71,47 @@ class GameMap:
         num_rooms += 1
 
     self.entities = [self.player]
+    self.colored_tiles = [[self.COLORS['dark_wall'] for y in range(self.height)] for x in range(self.width)]
   
   def create_room(self, room: Room) -> None:
     for x in range(room.x1 + 1, room.x2):
       for y in range(room.y1 + 1, room.y2):
-        self.tiles[x][y] = FLOOR
+        self.tiles[x][y].blocked = False 
+        self.tiles[x][y].block_sight = False 
   
   def create_h_tunnel(self, x1, x2, y):
     for x in range(min(x1, x2), max(x1, x2) + 1):
-      self.tiles[x][y] = FLOOR
+      self.tiles[x][y].blocked = False 
+      self.tiles[x][y].block_sight = False 
 
   def create_v_tunnel(self, y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
-      self.tiles[x][y] = FLOOR
+      self.tiles[x][y].blocked = False 
+      self.tiles[x][y].block_sight = False 
   
   def is_blocked(self, x, y):
-    if not self.tiles[x][y]:
+    if self.tiles[x][y].blocked:
       return True
 
     return False
 
   # TODO: clean me up!
-  def render(self, console: tcod.console.Console, fov_map) -> None:
+  def render(self, console: tcod.console.Console, fov_map, fov_recompute: bool) -> None:
     console.tiles['ch'][:self.width, :self.height] = ord(' ')
 
-    dark = np.where(
-      self.tiles[..., np.newaxis],
-      self.COLORS['dark_ground'],
-      self.COLORS['dark_wall']
-    )
+    if fov_recompute:
+      # FIXME: find a better way to do this, like with np.where
+      for x in range(self.width):
+        for y in range (self.height):
+          visible = tcod.map_is_in_fov(fov_map, x, y) 
+          wall = self.tiles[x][y].block_sight
 
-    # console.tiles['bg'][:self.width, :self.height, :3] = dark
-
-    colored_tiles = []
-    # FIXME: find a better way to do this, like with np.where
-    for x in range(self.width):
-      tiles = []
-      for y in range (self.height):
-        if tcod.map_is_in_fov(fov_map, x, y):
-          tiles.append(self.COLORS['light_wall'] if self.tiles[x][y] else self.COLORS['light_ground'])
-        else:
-          tiles.append(self.COLORS['dark_wall'] if self.tiles[x][y] else self.COLORS['dark_ground'])
-      colored_tiles.append(tiles)
+          if visible:
+            self.colored_tiles[x][y] = self.COLORS['light_wall'] if wall else self.COLORS['light_ground']
+            self.tiles[x][y].explored = True
+          elif self.tiles[x][y].explored:
+            self.colored_tiles[x][y] = self.COLORS['dark_wall'] if wall else self.COLORS['dark_ground']
+    console.tiles['bg'][:self.width, :self.height, :3] = self.colored_tiles
 
     # def is_visible(tile):
     #   print(tile)
@@ -124,7 +123,6 @@ class GameMap:
     #   self.COLORS['light_wall'],
     #   self.COLORS['light_ground']
     # )
-    console.tiles['bg'][:self.width, :self.height, :3] = np.array(colored_tiles)
 
     for obj in self.entities:
       if 0 <= obj.x < console.width and 0 <= obj.y < console.height:
