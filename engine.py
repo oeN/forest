@@ -5,13 +5,13 @@ from input_handlers import handle_keys
 from render_functions import render_all, clear_all
 
 import state
-from map_objects.game_map import GameMap
+from game_map import GameMap
 
 def main():
   screen_width, screen_height = 80, 50
   map_width, map_height = 80, 45
 
-  tcod.console_set_custom_font('cp437-14.png', tcod.FONT_LAYOUT_CP437, 32, 8)
+  tcod.console_set_custom_font('arial10x10.png', tcod.FONT_LAYOUT_TCOD)
 
   with tcod.console_init_root(
     screen_width,

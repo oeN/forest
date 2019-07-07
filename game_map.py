@@ -1,15 +1,52 @@
-from typing import List
+# Import this to avoid "name 'GameMap' is not defined" in the Room class
+from __future__ import annotations
+
+from typing import List, Optional, Tuple, Type
 from random import randint
 
 import tcod
 import numpy as np
 
-from map_objects.tile import Tile
-from map_objects.room import Room
 import entity
+import fighter
 
 WALL = 0
 FLOOR = 1
+
+class Room:
+  def __init__(self, x, y, w, h) -> None:
+    self.x1, self.y1 = x, y
+    self.x2 = x + w
+    self.y2 = y + h
+
+  @property
+  def inner(self) -> Tuple[slice, slice]:
+    """Return the NumPy index for the inner room area."""
+    index: Tuple[slice, slice] = np.s_[
+      self.x1 + 1 : self.x2 - 1, self.y1 + 1 : self.y2 - 1
+    ]
+    return index
+  
+  @property
+  def center(self) -> Tuple[int, int]:
+    return (self.x1 + self.x2) // 2, (self.y1 + self.y2) // 2
+
+  def intersects(self, other) -> bool:
+    # returns true if this rectangle intersects with another one
+    return (
+      self.x1 <= other.x2 and self.x2 >= other.x1 and
+      self.y1 <= other.y2 and self.y2 >= other.y1
+    )
+  
+  def place_entities(self, gamemap: GameMap) -> None:
+    monsters = randint(0, 3)
+    for _ in range(monsters):
+      x = randint(self.x1 + 1, self.x2 - 2)
+      y = randint(self.y1 + 1, self.y2 - 2)
+      if gamemap.is_blocked(x, y):
+        continue
+      # TODO: add code for random enemy type
+      gamemap.entities.append(entity.Entity(x, y, fighter.Orc()))
 
 class GameMap:
   COLORS = {
@@ -64,15 +101,30 @@ class GameMap:
         self.tiles[tcod.line_where(*t_middle, *t_end)] = FLOOR
       self.rooms.append(new_room)
 
-    self.player = entity.Entity(*self.rooms[0].center, ord('@'), tcod.white)
+    for room in self.rooms:
+      room.place_entities(self)
+
+    self.player = entity.Entity(*self.rooms[0].center, fighter.Player())
     self.entities.append(self.player)
     self.update_fov()
   
   def is_blocked(self, x, y):
-    if not self.tiles[x][y]:
+    if not self.tiles[x, y]:
+      return True
+    if self.entity_at(x, y):
       return True
 
     return False
+  
+  def entity_at(self, x, y) -> Optional[entity.Entity]:
+    """Return any entity found at x,y position"""
+    # TODO: Check if having a bidimensional array of entities can improve performance
+    for e in self.entities:
+      if not e.visible:
+        continue
+      if x == e.x and y == e.y:
+        return e
+    return None
   
   def update_fov(self) -> None:
     self.visible = tcod.map.compute_fov(
@@ -109,6 +161,8 @@ class GameMap:
       if not (0 <= obj.x < console.width and 0 <= obj.y < console.height):
         continue
       if not self.visible[obj.x, obj.y]:
+        continue
+      if not obj.visible:
         continue
       console.tiles['ch'][obj.x, obj.y] = obj.char
       console.tiles['fg'][obj.x, obj.y, :3] = obj.color

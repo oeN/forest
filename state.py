@@ -1,7 +1,7 @@
 import tcod
 import tcod.event
 
-from map_objects.game_map import GameMap
+from game_map import GameMap
 
 class GameState(tcod.event.EventDispatch):
   COMMAND_KEYS = {
@@ -37,6 +37,9 @@ class GameState(tcod.event.EventDispatch):
   
   def cmd_move(self, x: int, y: int) -> None:
     player = self.active_map.player
+    target = self.active_map.entity_at(*player.relative(x, y))
     if not self.active_map.is_blocked(*player.relative(x, y)):
       player.move(x, y)
       self.active_map.update_fov()
+    elif target:
+      player.attack(target)
