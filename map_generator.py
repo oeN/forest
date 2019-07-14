@@ -63,7 +63,7 @@ def generate(width: int, height: int) -> GameMap:
   gm.tiles[...] = WALL
   rooms: List[Room] = []
 
-  for r in range(ROOMS['max']):
+  for _ in range(ROOMS['max']):
     w = randint(ROOMS['min_size'], ROOMS['max_size'])
     h = randint(ROOMS['min_size'], ROOMS['max_size'])
     x = randint(0, width - w - 1)

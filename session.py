@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from game_map import GameMap
+from typing import List, TYPE_CHECKING
+
 from entity import Entity
 from components.ai import AI
+
+if TYPE_CHECKING:
+  from game_map import GameMap
 
 class Session:
   active_map: GameMap
@@ -18,3 +22,7 @@ class Session:
       if obj is self.player:
         continue
       obj[AI].take_turn(obj)
+
+  def report(self, text: str) -> None:
+    print(text)
+

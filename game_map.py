@@ -7,6 +7,7 @@ import tcod
 import numpy as np
 
 import entity
+from session import Session
 from components.fighter import Fighter
 from components.location import Location
 
@@ -31,6 +32,7 @@ class GameMap:
   }
 
   player: entity.Entity
+  session: Session
 
   def __init__(self, width, height):
     self.width = width
@@ -42,6 +44,8 @@ class GameMap:
     self.entities: List[entity.Entity] = []
 
   def is_blocked(self, x, y):
+    if not (0 <= x < self.width and 0 <= y < self.height):
+      return True
     if not self.tiles[x, y]:
       return True
     if self.entity_at(x, y):

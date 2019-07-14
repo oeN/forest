@@ -25,6 +25,7 @@ def main():
   ) as console:
     session_ = Session()
     session_.active_map = map_generator.generate(map_width, map_height)
+    session_.active_map.session = session_
     current_state = state.GameState(session_)
     current_state.run(console)
 
