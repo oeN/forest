@@ -7,6 +7,7 @@ from render_functions import render_all, clear_all
 import state
 from game_map import GameMap
 import map_generator
+from session import Session
 
 def main():
   screen_width, screen_height = 80, 50
@@ -22,8 +23,9 @@ def main():
     vsync=True,
     order='F'
   ) as console:
-    game_map = map_generator.generate(map_width, map_height)
-    current_state = state.GameState(game_map)
+    session_ = Session()
+    session_.active_map = map_generator.generate(map_width, map_height)
+    current_state = state.GameState(session_)
     current_state.run(console)
 
 if __name__ == '__main__':

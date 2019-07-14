@@ -2,6 +2,7 @@ import tcod
 import tcod.event
 
 from game_map import GameMap
+from session import Session
 
 class GameState(tcod.event.EventDispatch):
   COMMAND_KEYS = {
@@ -15,8 +16,12 @@ class GameState(tcod.event.EventDispatch):
     tcod.event.K_DOWN: (0, 1)
   }
 
-  def __init__(self, active_map: GameMap):
-    self.active_map = active_map
+  def __init__(self, session: Session):
+    self.session = session
+
+  @property
+  def active_map(self) -> GameMap:
+    return self.session.active_map
 
   def run(self, console: tcod.console.Console) -> None:
     while True:
@@ -50,3 +55,4 @@ class GameState(tcod.event.EventDispatch):
       self.active_map.update_fov()
     elif target:
       player.attack(target)
+    self.session.enemy_turn()

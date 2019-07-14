@@ -1,5 +1,4 @@
-from typing import Tuple
-
+from typing import Tuple, Optional
 
 class Fighter:
     name: str = "<Unnamed>"
@@ -12,7 +11,7 @@ class Fighter:
 
     def __init__(self) -> None:
         self.max_hp = self.hp
-    
+
     @property
     def is_dead(self):
       return self.hp == 0

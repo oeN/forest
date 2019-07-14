@@ -7,10 +7,15 @@ import numpy as np
 
 from game_map import GameMap
 import entity
-from components import fighter
+from components import fighter, ai
 
 WALL = 0
 FLOOR = 1
+
+def spawn_entity(cls: fighter.Fighter, location) -> entity.Entity:
+  e = entity.Entity(location.x, location.y, cls(), ai.BasicMonster())
+  location.map.entities.append(e)
+  return e
 
 class Room:
   def __init__(self, x, y, w, h) -> None:
@@ -45,7 +50,8 @@ class Room:
       if gamemap.is_blocked(x, y):
         continue
       # TODO: add code for random enemy type
-      gamemap.entities.append(entity.Entity(x, y, fighter.Orc()))
+      spawn_entity(fighter.Orc, gamemap[x, y])
+      # gamemap.entities.append(entity.Entity(x, y, fighter.Orc(), ai.BasicMonster()))
 
 def generate(width: int, height: int) -> GameMap:
   ROOMS = {
@@ -82,7 +88,7 @@ def generate(width: int, height: int) -> GameMap:
   for room in rooms:
     room.place_entities(gm)
 
-  gm.player = entity.Entity(*rooms[0].center, fighter.Player())
+  gm.player = spawn_entity(fighter.Player, gm[rooms[0].center])
   gm.entities.append(gm.player)
   gm.update_fov()
   return gm

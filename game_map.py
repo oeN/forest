@@ -7,7 +7,13 @@ import tcod
 import numpy as np
 
 import entity
-from components import fighter
+from components import fighter, location
+
+class MapLocation(location.Location):
+  def __init__(self, gamemap: GameMap, x: int, y: int):
+    self.map = gamemap
+    self.x = x
+    self.y = y
 
 class GameMap:
   COLORS = {
@@ -92,3 +98,6 @@ class GameMap:
         continue
       console.tiles['ch'][obj.x, obj.y] = obj.char
       console.tiles['fg'][obj.x, obj.y, :3] = obj.color
+
+  def __getitem__(self, key: Tuple[int, int]) -> MapLocation:
+    return MapLocation(self, *key)
