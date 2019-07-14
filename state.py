@@ -18,23 +18,30 @@ class GameState(tcod.event.EventDispatch):
   def __init__(self, active_map: GameMap):
     self.active_map = active_map
 
+  def run(self, console: tcod.console.Console) -> None:
+    while True:
+      self.on_draw(console)
+      tcod.console_flush()
+
+      for event in tcod.event.wait():
+        self.dispatch(event)
+
   def on_draw(self, console: tcod.console.Console) -> None:
     console.clear()
     self.active_map.render(console)
-    tcod.console_flush()
-  
+
   def ev_quit(self, event: tcod.event.Quit) -> None:
     self.cmd_quit()
-  
+
   def ev_keydown(self, event: tcod.event.KeyDown) -> None:
     if event.sym in self.COMMAND_KEYS:
       getattr(self, "cmd_%s" % event.sym)()
     elif event.sym in self.MOVE_KEYS:
       self.cmd_move(*self.MOVE_KEYS[event.sym])
-  
+
   def cmd_quit(self) -> None:
     raise SystemExit()
-  
+
   def cmd_move(self, x: int, y: int) -> None:
     player = self.active_map.player
     target = self.active_map.entity_at(*player.relative(x, y))

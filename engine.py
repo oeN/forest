@@ -6,12 +6,13 @@ from render_functions import render_all, clear_all
 
 import state
 from game_map import GameMap
+import map_generator
 
 def main():
   screen_width, screen_height = 80, 50
   map_width, map_height = 80, 45
 
-  tcod.console_set_custom_font('arial10x10.png', tcod.FONT_LAYOUT_TCOD)
+  tcod.console_set_custom_font('data/arial10x10.png', tcod.FONT_LAYOUT_TCOD)
 
   with tcod.console_init_root(
     screen_width,
@@ -21,15 +22,9 @@ def main():
     vsync=True,
     order='F'
   ) as console:
-    game_map = GameMap(map_width, map_height)
-    game_map.generate()
+    game_map = map_generator.generate(map_width, map_height)
     current_state = state.GameState(game_map)
-
-    while current_state:
-      current_state.on_draw(console)
-
-      for event in tcod.event.wait():
-        current_state.dispatch(event)
+    current_state.run(console)
 
 if __name__ == '__main__':
   main()

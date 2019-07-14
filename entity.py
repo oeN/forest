@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-import fighter
+from components import fighter
 
 class Entity:
   """
