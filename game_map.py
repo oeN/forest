@@ -7,9 +7,10 @@ import tcod
 import numpy as np
 
 import entity
-from components import fighter, location
+from components.fighter import Fighter
+from components.location import Location
 
-class MapLocation(location.Location):
+class MapLocation(Location):
   def __init__(self, gamemap: GameMap, x: int, y: int):
     self.map = gamemap
     self.x = x
@@ -52,16 +53,16 @@ class GameMap:
     """Return any entity found at x,y position"""
     # TODO: Check if having a bidimensional array of entities can improve performance
     for e in self.entities:
-      if not e.visible:
+      if e[Fighter].is_dead:
         continue
-      if x == e.x and y == e.y:
+      if e[Location].xy == (x, y):
         return e
     return None
 
   def update_fov(self) -> None:
     self.visible = tcod.map.compute_fov(
       transparency=self.tiles,
-      pov=(self.player.x, self.player.y),
+      pov=self.player[Location].xy,
       radius=10,
       light_walls=True,
       algorithm=tcod.FOV_RESTRICTIVE,
@@ -90,14 +91,17 @@ class GameMap:
     )
 
     for obj in self.entities:
-      if not (0 <= obj.x < console.width and 0 <= obj.y < console.height):
+      if not obj[Fighter]:
         continue
-      if not self.visible[obj.x, obj.y]:
+      if obj[Fighter].is_dead:
         continue
-      if not obj.visible:
+      x, y = xy = obj[Location].xy
+      if not (0 <= x < console.width and 0 <= y < console.height):
         continue
-      console.tiles['ch'][obj.x, obj.y] = obj.char
-      console.tiles['fg'][obj.x, obj.y, :3] = obj.color
+      if not self.visible[xy]:
+        continue
+      console.tiles['ch'][xy] = obj[Fighter].char
+      console.tiles['fg'][x, y, :3] = obj[Fighter].color
 
   def __getitem__(self, key: Tuple[int, int]) -> MapLocation:
     return MapLocation(self, *key)

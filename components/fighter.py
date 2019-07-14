@@ -1,6 +1,8 @@
 from typing import Tuple, Optional
 
-class Fighter:
+from components import base
+
+class Fighter(base.Component, base_component=True):
     name: str = "<Unnamed>"
     char: int = ord("!")
     color: Tuple[int, int, int] = (255, 255, 255)

@@ -3,6 +3,23 @@ import tcod.event
 
 from game_map import GameMap
 from session import Session
+from components.location import Location
+from components.fighter import Fighter
+
+def attack(actor, target) -> None:
+  assert actor[Location].distance_to(target[Location]) <= 1
+
+  damage = actor[Fighter].power - target[Fighter].defense
+
+  attack_direction = f"{actor[Fighter].name} attacks {target[Fighter].name}"
+
+  if damage > 0:
+    target[Fighter].hp -= damage
+    print(f"{attack_direction} for {damage} hit points")
+  else:
+    print(f"{attack_direction} without consequences")
+  if target[Fighter].hp <= 0:
+    print(f"The {target[Fighter].name} dies")
 
 class GameState(tcod.event.EventDispatch):
   COMMAND_KEYS = {
@@ -49,10 +66,11 @@ class GameState(tcod.event.EventDispatch):
 
   def cmd_move(self, x: int, y: int) -> None:
     player = self.active_map.player
-    target = self.active_map.entity_at(*player.relative(x, y))
-    if not self.active_map.is_blocked(*player.relative(x, y)):
-      player.move(x, y)
+    destination = player[Location].relative(x, y)
+    target = self.active_map.entity_at(*destination)
+    if not self.active_map.is_blocked(*destination):
+      player[Location] = self.active_map[destination]
       self.active_map.update_fov()
     elif target:
-      player.attack(target)
+      attack(player, target)
     self.session.enemy_turn()

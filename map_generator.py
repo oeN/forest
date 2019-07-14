@@ -13,7 +13,7 @@ WALL = 0
 FLOOR = 1
 
 def spawn_entity(cls: fighter.Fighter, location) -> entity.Entity:
-  e = entity.Entity(location.x, location.y, cls(), ai.BasicMonster())
+  e = entity.Entity((location, cls(), ai.BasicMonster()))
   location.map.entities.append(e)
   return e
 
@@ -51,7 +51,6 @@ class Room:
         continue
       # TODO: add code for random enemy type
       spawn_entity(fighter.Orc, gamemap[x, y])
-      # gamemap.entities.append(entity.Entity(x, y, fighter.Orc(), ai.BasicMonster()))
 
 def generate(width: int, height: int) -> GameMap:
   ROOMS = {

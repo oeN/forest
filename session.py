@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from game_map import GameMap
 from entity import Entity
-from components import fighter, ai
+from components.ai import AI
 
 class Session:
   active_map: GameMap
@@ -13,8 +13,8 @@ class Session:
 
   def enemy_turn(self) -> None:
     for obj in self.active_map.entities:
-      if not obj.ai:
+      if AI not in obj:
         continue
       if obj is self.player:
         continue
-      obj.ai.take_turn(obj)
+      obj[AI].take_turn(obj)
