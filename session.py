@@ -4,6 +4,7 @@ from typing import List, TYPE_CHECKING
 
 from entity import Entity
 from components.ai import AI
+from components.speed import Speed
 
 if TYPE_CHECKING:
   from game_map import GameMap
@@ -24,7 +25,7 @@ class Session:
         continue
       if obj is self.player:
         continue
-      obj[AI].take_turn(obj)
+      obj[Speed].take_action(lambda: obj[AI].take_turn(obj))
 
   def report(self, text: str) -> None:
     print(text)

@@ -39,8 +39,8 @@ class GameMap:
     self.height = height
     self.shape = width, height
     self.tiles = np.zeros(self.shape, dtype=bool, order='F')
-    self.explored = np.zeros(self.shape, dtype=bool, order='F')
-    self.visible = np.zeros(self.shape, dtype=bool, order='F')
+    self.explored = np.ones(self.shape, dtype=bool, order='F')
+    self.visible = np.ones(self.shape, dtype=bool, order='F')
     self.entities: List[entity.Entity] = []
 
   def is_blocked(self, x, y):
@@ -64,13 +64,13 @@ class GameMap:
     return None
 
   def update_fov(self) -> None:
-    self.visible = tcod.map.compute_fov(
-      transparency=self.tiles,
-      pov=self.player[Location].xy,
-      radius=10,
-      light_walls=True,
-      algorithm=tcod.FOV_RESTRICTIVE,
-    )
+    # self.visible = tcod.map.compute_fov(
+    #   transparency=self.tiles,
+    #   pov=self.player[Location].xy,
+    #   radius=10,
+    #   light_walls=True,
+    #   algorithm=tcod.FOV_RESTRICTIVE,
+    # )
 
     self.explored |= self.visible
 
