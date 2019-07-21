@@ -11,6 +11,9 @@ if TYPE_CHECKING:
 class Session:
   active_map: GameMap
 
+  def __init__(self) -> None:
+    self.log: List[str] = []
+
   @property
   def player(self) -> Entity:
     return self.active_map.player
@@ -25,4 +28,5 @@ class Session:
 
   def report(self, text: str) -> None:
     print(text)
+    self.log.append(text)
 

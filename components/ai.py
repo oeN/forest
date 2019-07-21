@@ -33,6 +33,9 @@ class BasicMonster(AI):
     self.path: List[Tuple[int, int]] = []
 
   def take_turn(self, owner: Entity) -> None:
+    # Avoid dead monster attacks the player
+    if owner[Fighter] and owner[Fighter].is_dead:
+      return
     map_ = owner[Location].map
     if map_.visible[owner[Location].xy]:
       self.path = self.get_path(owner, map_.player[Location].xy)

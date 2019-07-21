@@ -6,6 +6,7 @@ from session import Session
 from components.location import Location
 from components.fighter import Fighter
 from systems import movement
+from ui import render_ui
 
 class GameState(tcod.event.EventDispatch):
   COMMAND_KEYS = {
@@ -37,6 +38,7 @@ class GameState(tcod.event.EventDispatch):
   def on_draw(self, console: tcod.console.Console) -> None:
     console.clear()
     self.active_map.render(console)
+    render_ui(console, self.session)
 
   def ev_quit(self, event: tcod.event.Quit) -> None:
     self.cmd_quit()
