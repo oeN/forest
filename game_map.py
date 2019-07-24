@@ -10,6 +10,7 @@ import entity
 from session import Session
 from components.fighter import Fighter
 from components.location import Location
+from components.sprite import Sprite
 
 class MapLocation(Location):
   def __init__(self, gamemap: GameMap, x: int, y: int):
@@ -48,16 +49,16 @@ class GameMap:
       return True
     if not self.tiles[x, y]:
       return True
-    if self.entity_at(x, y):
+    if self.fighter_at(x, y):
       return True
 
     return False
 
-  def entity_at(self, x, y) -> Optional[entity.Entity]:
+  def fighter_at(self, x, y) -> Optional[entity.Entity]:
     """Return any entity found at x,y position"""
     # TODO: Check if having a bidimensional array of entities can improve performance
     for e in self.entities:
-      if e[Fighter].is_dead:
+      if Fighter not in e or e[Fighter].is_dead:
         continue
       if e[Location].xy == (x, y):
         return e
@@ -95,17 +96,17 @@ class GameMap:
     )
 
     for obj in self.entities:
-      if not obj[Fighter]:
+      if Sprite not in obj:
         continue
-      if obj[Fighter].is_dead:
+      if Fighter in obj and obj[Fighter].is_dead:
         continue
       x, y = xy = obj[Location].xy
       if not (0 <= x < console.width and 0 <= y < console.height):
         continue
       if not self.visible[xy]:
         continue
-      console.tiles['ch'][xy] = obj[Fighter].char
-      console.tiles['fg'][x, y, :3] = obj[Fighter].color
+      console.tiles['ch'][xy] = obj[Sprite].char
+      console.tiles['fg'][x, y, :3] = obj[Sprite].color
 
   def __getitem__(self, key: Tuple[int, int]) -> MapLocation:
     return MapLocation(self, *key)

@@ -7,13 +7,15 @@ import numpy as np
 
 from game_map import GameMap
 import entity
-from components import fighter, ai
+from components import fighter, ai, item, location
+from components.location import Location
+import entities_db
 
 WALL = 0
 FLOOR = 1
 
-def spawn_entity(cls: fighter.Fighter, location) -> entity.Entity:
-  e = entity.Entity((location, cls(), ai.BasicMonster()))
+def spawn_entity(e: entity.Entity, location: location.Location) -> entity.Entity:
+  e[Location] = location
   location.map.entities.append(e)
   return e
 
@@ -42,15 +44,33 @@ class Room:
       self.y1 <= other.y2 and self.y2 >= other.y1
     )
 
-  def place_entities(self, gamemap: GameMap) -> None:
+  def random_coordinates(self) -> Tuple[int, int]:
+    x = randint(self.x1 + 1, self.x2 - 2)
+    y = randint(self.y1 + 1, self.y2 - 2)
+    return (x, y)
+
+  def spawn_monsters(self, gamemap: GameMap) -> None:
     monsters = randint(0, 3)
     for _ in range(monsters):
-      x = randint(self.x1 + 1, self.x2 - 2)
-      y = randint(self.y1 + 1, self.y2 - 2)
+      x, y = self.random_coordinates()
       if gamemap.is_blocked(x, y):
         continue
       # TODO: add code for random enemy type
-      spawn_entity(fighter.Orc, gamemap[x, y])
+      spawn_entity(entities_db.monsters['orc'](), gamemap[x, y])
+
+  def spawn_items(self, gamemap: GameMap) -> None:
+    items = randint(0, 2)
+    for _ in range(items):
+      x, y = self.random_coordinates()
+      if gamemap.is_blocked(x, y):
+        continue
+      # TODO: add code for random enemy type
+      spawn_entity(entities_db.items['healing_potiont'](), gamemap[x, y])
+
+  def place_entities(self, gamemap: GameMap) -> None:
+    self.spawn_monsters(gamemap)
+    self.spawn_items(gamemap)
+
 
 def generate(width: int, height: int) -> GameMap:
   ROOMS = {
@@ -87,7 +107,7 @@ def generate(width: int, height: int) -> GameMap:
   for room in rooms:
     room.place_entities(gm)
 
-  gm.player = spawn_entity(fighter.Player, gm[rooms[0].center])
+  gm.player = spawn_entity(entities_db.player(), gm[rooms[0].center])
   gm.entities.append(gm.player)
   gm.update_fov()
   return gm

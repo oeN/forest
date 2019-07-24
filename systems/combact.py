@@ -1,5 +1,6 @@
 from components.location import Location
 from components.fighter import Fighter
+from components.sprite import Sprite
 
 def attack(actor, target) -> None:
   assert actor[Location].distance_to(target[Location]) <= 1
@@ -7,7 +8,7 @@ def attack(actor, target) -> None:
   session = actor[Location].map.session
   damage = actor[Fighter].power - target[Fighter].defense
 
-  attack_direction = f"{actor[Fighter].name} attacks {target[Fighter].name}"
+  attack_direction = f"{actor[Sprite].name} attacks {target[Sprite].name}"
 
   if damage > 0:
     target[Fighter].hp -= damage
@@ -15,4 +16,4 @@ def attack(actor, target) -> None:
   else:
     session.report(f"{attack_direction} without consequences")
   if target[Fighter].hp <= 0:
-    session.report(f"The {target[Fighter].name} dies")
+    session.report(f"The {target[Sprite].name} dies")

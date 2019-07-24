@@ -8,7 +8,7 @@ from systems import combact
 def move_to(actor: entity.Entity, xy_destination: Tuple[int, int]) -> None:
   """Move an entity to a position, interacting with obstacles."""
   map_ = actor[Location].map
-  target = map_.entity_at(*xy_destination)
+  target = map_.fighter_at(*xy_destination)
   if not map_.is_blocked(*xy_destination):
     actor[Location] = map_[xy_destination]
     map_.update_fov()

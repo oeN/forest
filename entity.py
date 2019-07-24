@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Type, TypeVar, TYPE_CHECKING
+from typing import Tuple, Any, Dict, Iterable, Type, TypeVar, TYPE_CHECKING
+import tcod
 
 if TYPE_CHECKING:
   from components.base import Component
